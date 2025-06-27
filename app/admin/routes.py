@@ -1,13 +1,10 @@
-from flask import render_template, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.utils.decorators import role_required
+from flask import render_template
+from app.utils.decorators import admin_required
 
 
 from . import admin_bp
 
 @admin_bp.route('/dashboard')
-@jwt_required()
-@role_required('Admin')  #***
+@admin_required
 def admin_dashboard():
-    current_admin = get_jwt_identity()
-    return jsonfy({"massage" : "welcome to dashboard"})
+    return render_template('admin/dashboard.html')

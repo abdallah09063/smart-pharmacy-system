@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}تسجيل حساب جديد{% endblock %}
+
+{% block content %}
+<div class="container" dir="rtl" style="max-width: 500px;">
+  <h2 class="text-center mt-4">تسجيل حساب جديد</h2>
+
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    <div class="form-group mb-3">
+      {{ form.username.label(class="form-label") }}
+      {{ form.username(class="form-control", placeholder="أدخل اسم المستخدم") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.email.label(class="form-label") }}
+      {{ form.email(class="form-control", placeholder="أدخل البريد الإلكتروني") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.role.label(class="form-label") }}
+      {{ form.role(class="form-control", placeholder="أدخل الدور") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.password.label(class="form-label") }}
+      {{ form.password(class="form-control", placeholder="أدخل كلمة المرور") }}
+    </div>
+
+    <div class="form-group mb-3">
+      {{ form.confirm_password.label(class="form-label") }}
+      {{ form.confirm_password(class="form-control", placeholder="أعد كتابة كلمة المرور") }}
+    </div>
+
+    <div class="text-center">
+      {{ form.submit(class="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+{% endblock %}

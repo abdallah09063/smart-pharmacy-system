@@ -1,0 +1,18 @@
+<!-- app/templates/main/admin_dashboard.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-primary">لوحة تحكم المدير</h2>
+  <p>مرحبًا {{ session.username }} 👋</p>
+  
+  <ul class="list-group">
+    <li class="list-group-item">إدارة المستخدمين</li>
+    <li class="list-group-item">تقارير المخزون والمبيعات</li>
+    <li class="list-group-item">نشاط الدخول والخروج</li>
+    <li class="list-group-item">ذكاء صناعي: توصيات الأدوية</li>
+  </ul>
+
+  <a href="{{ url_for('auth.logout') }}" class="btn btn-danger mt-3">تسجيل الخروج</a>
+</div>
+{% endblock %}

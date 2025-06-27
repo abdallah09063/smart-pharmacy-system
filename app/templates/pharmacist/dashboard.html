@@ -1,0 +1,17 @@
+<!-- app/templates/main/pharmacist_dashboard.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-success">لوحة تحكم الصيدلي</h2>
+  <p>مرحبًا {{ session.username }} 👋</p>
+
+  <ul class="list-group">
+    <li class="list-group-item">عرض الأدوية وإضافة مبيعات</li>
+    <li class="list-group-item">طباعة الفواتير</li>
+    <li class="list-group-item">إدخال أعراض لاقتراح الدواء</li>
+  </ul>
+
+  <a href="{{ url_for('auth.logout') }}" class="btn btn-danger mt-3">تسجيل الخروج</a>
+</div>
+{% endblock %}

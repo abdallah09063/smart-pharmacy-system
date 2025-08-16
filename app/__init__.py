@@ -19,12 +19,12 @@ def create_app():
     jwt.init_app(app)
 
     from app.auth import auth_bp
-    from app.admin import admin_bp
-    from app.pharmacist import pharmacist_bp
+    from app.manager_window import manager_bp
+    from app.pharmacist_window import pharmacist_bp
 
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
-    app.register_blueprint(admin_bp, url_prefix='/admin')
+    app.register_blueprint(manager_bp, url_prefix='/manager')
     app.register_blueprint(pharmacist_bp, url_prefix='/pharmacist')
 
     return app

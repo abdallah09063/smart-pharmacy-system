@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block title %}نتائج البحث{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h3>نتائج البحث</h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>اسم الدواء</th>
+                <th>سعر البيع</th>
+                <th>الكمية على الرف</th>
+                <th>الكمية في المخزون</th>
+                <th>تاريخ الانتهاء</th>
+                <th>رقم الرف</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.name }}</td>
+                <td>{{ product.sell_price }} ر.س</td>
+                <td>{{ product.quantity_in_shelf }}</td>
+                <td>{{ product.quantity_in_stock }}</td>
+                <td>{{ product.expiry_date.strftime('%Y-%m-%d') }}</td>
+                <td>{{ product.shelf_number or '-' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('pharmacist.pharmacist_dashboard') }}" class="btn btn-secondary mt-3">عودة للوحة التحكم</a>
+</div>
+{% endblock %}

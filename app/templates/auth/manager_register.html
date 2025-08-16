@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% block title %}تسجيل حساب جديد - نظام إدارة الصيدلية{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+            <h2>تسجيل حساب جديد</h2>
+            <p>أنشئ حسابك للوصول إلى نظام إدارة الصيدلية</p>
+        </div>
+
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="form-group">
+                {{ form.manager_name.label(class="form-label") }}
+                {{ form.manager_name(class="form-control", placeholder="أدخل اسم المستخدم") }}
+                {% if form.manager_name.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.manager_name.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control", placeholder="أدخل البريد الإلكتروني") }}
+                {% if form.email.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.email.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.pharmacy_name.label(class="form-label") }}
+                {{ form.pharmacy_name(class="form-control", placeholder="أدخل اسم الصيدلية") }}
+                {% if form.pharmacy_name.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.pharmacy_name.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.password.label(class="form-label") }}
+                {{ form.password(class="form-control", placeholder="أدخل كلمة المرور") }}
+                {% if form.password.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.password.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.confirm_password.label(class="form-label") }}
+                {{ form.confirm_password(class="form-control", placeholder="أعد كتابة كلمة المرور") }}
+                {% if form.confirm_password.errors %}
+                    <div class="text-danger mt-1">
+                        {% for error in form.confirm_password.errors %}
+                            <small>{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+
+        
+    </div>
+</div>
+{% endblock %}

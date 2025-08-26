@@ -9,6 +9,10 @@ body {
     direction: rtl;
 }
 
+.system {
+    margin-right: 30px;
+}
+
 /* Auth Pages Styling */
 .auth-container {
     min-height: 100vh;
@@ -45,6 +49,7 @@ body {
 }
 
 .form-group {
+    position: relative;
     margin-bottom: 20px;
 }
 
@@ -84,6 +89,11 @@ body {
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.btn-secondary {
+    color: black;
+    background-color: #ffffff;
 }
 
 .auth-links {
@@ -174,15 +184,18 @@ body {
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
+    color: white;
 }
 
 .stat-card p {
     margin: 5px 0 0 0;
     opacity: 0.9;
+    color: white;
 }
 
 .quick-actions {
     display: grid;
+    color: #2c3e50;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 15px;
 }
@@ -242,10 +255,86 @@ body {
     border-color: #667eea;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
     background: white;
-}
+}*/
 
 /* Logout Button */
 .btn-outline-light:hover {
     background-color: rgba(255, 255, 255, 0.2);
     border-color: white;
+}
+
+ 
+.mb-3 {
+    position: relative; /* عشان القائمة تتموضع بالنسبة للحاوية */
+}
+
+.suggestions-list {
+    position: absolute;
+    top: 100%; /* تبدأ مباشرة تحت الـ input */
+    right: 0;  /* تلتصق من جهة اليمين */
+    left: 0;   /* تلتصق من جهة اليسار كمان (تغطي عرض الحاوية كله) */
+    background: #ffffff;
+    border: 1px solid #ddd;
+    border-top: none;
+    z-index: 1050;
+    max-height: 200px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    display: none;
+}
+
+.suggestions-list li {
+    padding: 8px 12px;
+    cursor: pointer;
+    text-align: right; /* للتوافق مع RTL */
+}
+
+.suggestions-list li:hover {
+    background-color: #f1f1f1;
+}
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-bottom: none;
+
+}
+
+.btn-close {
+    color: white;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+    position: absolute;
+    left: 20px;
+    top: 25px;
+    opacity: 0.8;
+}
+
+.btn-success {
+    background-color: #764ba2;
+    border-color: #764ba2;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #667eea;
+    border-color: #667eea;
+}
+
+
+.table {
+    border-color: #667eea;
+}
+
+.table tr:hover {
+    background-color: #667eea;
+    border-color: #115b1e;
+    cursor: pointer;
+}
+
+.col-md-6 {
+    width: 100%;
+}
+
+.me-2 {
+    size: 50px;
 }

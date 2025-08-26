@@ -8,7 +8,7 @@ The project consist of three main app, each one of them has its own beneficierie
     - Handle drugs selling.
     - Searching for drugs and check selling prices, availability (Remaining in shelves and stock), validity, location on shelves.
     - View daily sold and returned drugs.
-    - Creating weekly reports.
+    - Creating simple daily reports showing total of sales.
     - Handle returning sales.
     - Creates timestamps for the pharmacists login and logout times.
 

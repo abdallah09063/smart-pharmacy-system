@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}تفاصيل العملية{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h3>تفاصيل العملية </h3>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>معرف العملية</th>
+                <th>اسم المنتج</th>
+                <th>الكمية</th>
+                <th>سعر القطعة</th>
+                <th>إجمالي</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in sold_items %}
+            <tr>
+                <td>{{ item.sale_id }}</td>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity_sold }}</td>
+                <td>{{ item.unit_price }}</td>
+                <td>{{ item.subtotal_price }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="{{ url_for('pharmacist.today_sales') }}" class="btn btn-secondary mt-3">عودة للصفحة السابقة</a>
+</div>
+{% endblock %}

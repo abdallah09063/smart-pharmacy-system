@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}مبيعات اليوم{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h3>مبيعات اليوم</h3>
+    {% if sales %}
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>رقم عملية البيع</th>
+                    <th>البائع</th>
+                    <th>المبلغ</th>
+                    <th>الوقت</th>
+                    <th>تفاصيل</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sale in sales %}
+                <tr>
+                    <td>{{ sale.id }}</td>
+                    <td>{{ sale.pharmacist.name}}</td>
+                    <td>{{ sale.total_price }}</td>
+                    <td>{{ sale.created_at }}</td>
+                    <td>
+                        <a href="{{ url_for('pharmacist.sale_detail', id=sale.id) }}">View Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info mt-3 text-center">لا توجد مبيعات اليوم</div>
+    {% endif %}
+    <a href="{{ url_for('pharmacist.pharmacist_dashboard') }}" class="btn btn-secondary mt-3">عودة للوحة التحكم</a>
+</div>
+{% endblock %}

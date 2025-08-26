@@ -2,273 +2,388 @@
 {% block title %}لوحة تحكم الصيدلي - نظام إدارة الصيدلية{% endblock %}
 
 {% block navbar %}
-<nav class="navbar navbar-expand-lg dashboard-navbar">
-    <div class="container">
-        <a class="navbar-brand text-white" href="#">
-            <i class="fas fa-pills me-2"></i>
-            نظام إدارة الصيدلية
+<nav class="navbar navbar-expand-lg dashboard-navbar" aria-label="شريط التنقل">
+  <div class="container">
+    <a class="navbar-brand text-white d-flex align-items-center" href="#">
+      <i class="fas fa-pills me-2" aria-hidden="true"></i>
+      <span class="system">  نظام إدارة الصيدلية   </span>
+    </a>
+
+    <div class="navbar-nav ms-auto">
+      <div class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="fas fa-user me-1" aria-hidden="true"></i>
+          <span class="visually-hidden">القائمة الشخصية:</span>
+          <span>{{ session.username }}</span>
         </a>
-        
-        <div class="navbar-nav ms-auto">
-            <div class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="fas fa-user me-1"></i>
-                    {{ session.username }}
-                </a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>الملف الشخصي</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>الإعدادات</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</a></li>
-                </ul>
-            </div>
-        </div>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
+              <i class="fas fa-sign-out-alt me-2" aria-hidden="true"></i>تسجيل الخروج
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </div>
 </nav>
 {% endblock %}
 
 {% block content %}
 <div class="dashboard-container">
-    <div class="container">
-        <div class="dashboard-card">
-            <div class="dashboard-header">
-                <h1><i class="fas fa-tachometer-alt me-3"></i>لوحة تحكم الصيدلي</h1>
-                <p>مرحباً {{ session.pharmacist_name }}، إليك نظرة عامة على أنشطة الصيدلية اليوم</p>
-            </div>
+  <div class="container">
+    <div class="dashboard-card">
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <i class="fas fa-prescription-bottle-alt"></i>
-                    <h3>{{  product_count  }}</h3>
-                    <p>الأدوية المتوفرة</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-shopping-cart"></i>
-                    <h3>18</h3>
-                    <p>المبيعات اليوم</p>
-                </div>
-                <div class="stat-card">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h3>12</h3>
-                    <p>أدوية منتهية الصلاحية</p>
-                </div>
-            </div>
+      <!-- Header -->
+      <header class="dashboard-header">
+        <h1 class="h3 mb-2">
+          <i class="fas fa-tachometer-alt me-3" aria-hidden="true"></i>
+          لوحة تحكم الصيدلي
+        </h1>
+        <p class="mb-0">مرحباً {{ session.pharmacist_name }}، إليك نظرة عامة على أنشطة الصيدلية اليوم</p>
+      </header>
 
-            <div class="dashboard-card">
-                <h3><i class="fas fa-tasks me-2"></i>الإجراءات السريعة</h3>
-                <div class="quick-actions">
-                    <!-- Button to trigger modal -->
-                    <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#addnewMedicineModal">
-                        <i class="fas fa-plus-circle"></i>
-                        <span>إضافة دواء جديد</span>
-                    </a>
-                    <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
-                        <i class="fas fa-database"></i>
-                        <span>زيادة صنف موجود مسبفاً</span>
-                    </a>
-                    <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#searchProductModal">
-                        <i class="fas fa-search"></i>
-                        <span>البحث عن دواء</span>
-                    </a>
-                    <a href="#" class="action-btn">
-                        <i class="fas fa-receipt"></i>
-                        <span>إنشاء فاتورة</span>
-                    </a>
-                    <a href="#" class="action-btn">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>تقارير المبيعات</span>
-                    </a>
-                    <a href="#" class="action-btn">
-                        <i class="fas fa-warehouse"></i>
-                        <span>إدارة المخزون</span>
-                    </a>
-                    <a href="#" class="action-btn">
-                        <i class="fas fa-users"></i>
-                        <span>إدارة العملاء</span>
-                    </a>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="dashboard-card">
-                        <h4><i class="fas fa-bell me-2"></i>التنبيهات الحديثة</h4>
-                        <div class="list-group list-group-flush">
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-exclamation-circle text-warning me-2"></i>
-                                    دواء الباراسيتامول ينتهي خلال 3 أيام
-                                </div>
-                                <small class="text-muted">منذ ساعتين</small>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-info-circle text-info me-2"></i>
-                                    طلب جديد من العميل أحمد محمد
-                                </div>
-                                <small class="text-muted">منذ 4 ساعات</small>
-                            </div>
-                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <i class="fas fa-check-circle text-success me-2"></i>
-                                    تم استلام شحنة أدوية جديدة
-                                </div>
-                                <small class="text-muted">أمس</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="dashboard-card">
-                        <h4><i class="fas fa-chart-line me-2"></i>أداء هذا الشهر</h4>
-                        <div class="row text-center">
-                            <div class="col-6">
-                                <h5 class="text-primary">15,240 ر.س</h5>
-                                <small class="text-muted">إجمالي المبيعات</small>
-                            </div>
-                            <div class="col-6">
-                                <h5 class="text-success">+12%</h5>
-                                <small class="text-muted">نمو المبيعات</small>
-                            </div>
-                        </div>
-                        <div class="row text-center mt-3">
-                            <div class="col-6">
-                                <h5 class="text-info">342</h5>
-                                <small class="text-muted">عدد العملاء</small>
-                            </div>
-                            <div class="col-6">
-                                <h5 class="text-warning">89%</h5>
-                                <small class="text-muted">رضا العملاء</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <!-- Stats -->
+      <section class="stats-grid mt-4" aria-label="إحصاءات عامة">
+        <div class="stat-card" role="status" aria-live="polite">
+          <i class="fas fa-prescription-bottle-alt" aria-hidden="true"></i>
+          <h3 class="mb-1">{{ product_count }}</h3>
+          <p class="mb-0">الأدوية المتوفرة</p>
         </div>
-    </div>
-                    <!-- Modal -->
-                    <div class="modal fade" id="addnewMedicineModal" tabindex="-1" aria-labelledby="addnewMedicineModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                        
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addnewMedicineModalLabel">إضافة دواء جديد</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
-                        </div>
+        <div class="stat-card">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+          <h3 class="mb-1">{{  today_sales  }}</h3>
+          <p class="mb-0">المبيعات اليوم</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+          <h3 class="mb-1">{{  expired_products  }}</h3>
+          <p class="mb-0">أدوية منتهية الصلاحية</p>
+        </div>
+      </section>
 
-                        <form method="POST" action="{{ url_for('pharmacist.add_product') }}">
-                            {{ form.hidden_tag() }}  <!-- Flask-WTF CSRF token -->
-                            <div class="modal-body">
 
-                            <div class="mb-3">
-                                {{ form.name.label(class="form-label") }}
-                                {{ form.name(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.quantity_in_shelf.label(class="form-label") }}
-                                {{ form.quantity_in_shelf(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.quantity_in_stock.label(class="form-label") }}
-                                {{ form.quantity_in_stock(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.shelf_number.label(class="form-label") }}
-                                {{ form.shelf_number(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.purchase_price.label(class="form-label") }}
-                                {{ form.purchase_price(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.sell_price.label(class="form-label") }}
-                                {{ form.sell_price(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.expiry_date.label(class="form-label") }}
-                                {{ form.expiry_date(class="form-control", type="date") }}
-                            </div>
-
-                            </div>
-                            
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-primary">إضافة</button>
-                            </div>
-                        </form>
-
-                        </div>
-                    </div>
+      <!-- Two Column Widgets -->
+      <div class="row mt-4">
+        <div class="col-md-6">
+          <section class="dashboard-card h-100" aria-label="تنبيهات حديثة">
+            <h4 class="h6 mb-3">
+              <i class="fas fa-bell me-2" aria-hidden="true"></i>
+               التنبيهات الحديثة
+            </h4>
+            <div class="list-group list-group-flush">
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-exclamation-circle text-warning me-2" aria-hidden="true"></i>
+                     الرجاء مراجعة مخزون
+                  {% for product in few_products %}
+                    {% if loop.last %}
+                      {{ product.name }}
+                    {% else %}
+                      {{ product.name }} و
+                    {% endif %}
+                  {% endfor %}
+                  الكمية على الرف أوشكت على النفاذ
+                </div> 
+              </div>
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <i class="fas fa-check-circle text-success me-2" aria-hidden="true"></i>
+                  تم استلام شحنة أدوية جديدة
                 </div>
-                    <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
-                        
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="addMedicineModalLabel">زيادة دواء موجود مسبفاً</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
-                        </div>
-
-                        <form method="POST" action="{{ url_for('pharmacist.increase_product') }}">
-                            {{ form.hidden_tag() }}  <!-- Flask-WTF CSRF token -->
-                            <div class="modal-body">
-
-                            <div class="mb-3">
-                                {{ form.name.label(class="form-label") }}
-                                {{ form.name(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.quantity_in_shelf.label(class="form-label") }}
-                                {{ form.quantity_in_shelf(class="form-control") }}
-                            </div>
-
-                            <div class="mb-3">
-                                {{ form.quantity_in_stock.label(class="form-label") }}
-                                {{ form.quantity_in_stock(class="form-control") }}
-                            </div>
-                            </div>
-                            
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-                            <button type="submit" class="btn btn-primary">إضافة</button>
-                            </div>
-                        </form>
-
-                        </div>
-                    </div>
-                    </div>
-                    <!-- Search Product Modal -->
-<div class="modal fade" id="searchProductModal" tabindex="-1" aria-labelledby="searchProductModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="searchProductModalLabel">البحث عن دواء</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+                <small class="text-muted">أمس</small>
+              </div>
+            </div>
+          </section>
+        </div>
+        <!--<div class="col-md-6">
+          <section class="dashboard-card h-100" aria-label="أداء هذا الشهر">
+            <h4 class="h6 mb-3">
+              <i class="fas fa-chart-line me-2" aria-hidden="true"></i>أداء هذا الشهر
+            </h4>
+            <div class="row text-center g-3">
+              <div class="col-6">
+                <h5 class="text-primary mb-1">15,240 ر.س</h5>
+                <small class="text-muted">إجمالي المبيعات</small>
+              </div>
+              <div class="col-6">
+                <h5 class="text-success mb-1">+12%</h5>
+                <small class="text-muted">نمو المبيعات</small>
+              </div>
+            </div>
+            <div class="row text-center g-3 mt-1">
+              <div class="col-6">
+                <h5 class="text-info mb-1">342</h5>
+                <small class="text-muted">عدد العملاء</small>
+              </div>
+              <div class="col-6">
+                <h5 class="text-warning mb-1">89%</h5>
+                <small class="text-muted">رضا العملاء</small>
+              </div>
+            </div>
+          </section>
+        </div>-->
       </div>
-      <form method="POST" action="{{ url_for('pharmacist.search_product') }}">
-        {{ form.hidden_tag() }}
-        <div class="modal-body">
-          <div class="mb-3">
-            <label for="searchName" class="form-label">اسم الدواء</label>
-            <input type="text" name="name" id="searchName" class="form-control" placeholder="أدخل اسم الدواء" required>
+
+      <!-- Quick Actions -->
+      <section class="dashboard-card mt-4" aria-label="إجراءات سريعة">
+        <h3 class="h5 mb-3">
+          <i class="fas fa-tasks me-2" aria-hidden="true"></i>
+        الإجراءات السريعة  
+        </h3>
+        <div class="quick-actions">
+
+          <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#sellModal">
+            <i class="fas fa-money-bill-wave" aria-hidden="true"></i>
+            <span>معاملة بيع جديدة</span>
+          </a>
+
+          <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#addnewMedicineModal">
+            <i class="fas fa-plus-circle" aria-hidden="true"></i>
+            <span>إضافة دواء جديد</span>
+          </a>
+
+          <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#addMedicineModal">
+            <i class="fas fa-database" aria-hidden="true"></i>
+            <span>زيادة صنف موجود مسبقاً</span>
+          </a>
+
+          <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#searchProductModal">
+            <i class="fas fa-search" aria-hidden="true"></i>
+            <span>البحث عن دواء</span>
+          </a>
+
+          <a href="{{ url_for('pharmacist.veiw_all_products') }}" class="action-btn">
+            <i class="fas fa-warehouse" aria-hidden="true"></i>
+            <span>إدارة المخزون</span>
+          </a>
+
+          <a href="{{ url_for('pharmacist.today_sales') }}" class="action-btn">
+            <i class="fas fa-chart-bar" aria-hidden="true"></i>
+            <span>تفاصيل المبيعات</span>
+          </a>
+
+          <!--<a href="#" class="action-btn">
+            <i class="fas fa-warehouse" aria-hidden="true"></i>
+            <span>إدارة المخزون</span>
+          </a>-->
+
+          <!--<a href="#" class="action-btn">
+            <i class="fas fa-users" aria-hidden="true"></i>
+            <span>إدارة العملاء</span>
+          </a>--->
+
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ========================= Modals ========================= -->
+
+  <!-- Sell Modal -->
+  <div class="modal fade" id="sellModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title">بيع منتجات</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <!-- الخطوة الأولى: إدخال عدد المنتجات -->
+        <div id="step1">
+          <label class="form-label">كم عدد أنواع المنتجات المختلفة التي تريد بيعها؟</label>
+          <input type="number" id="productCount" class="form-control" min="1" placeholder="أدخل عدد المنتجات">
+          <button class="btn btn-success mt-3" onclick="generateProductFields()">متابعة</button>
+        </div>
+
+        <!-- الخطوة الثانية: إدخال تفاصيل المنتجات -->
+        <form id="sellForm" class="mt-3" style="display:none;" method="POST" action="{{ url_for('pharmacist.sell_product') }}">
+          {{ form.hidden_tag() }}
+          <div id="productsContainer"></div>
+          <button type="submit" class="btn btn-primary mt-3">تأكيد البيع</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+  <!-- Add New Medicine Modal -->
+  <div class="modal fade" id="addnewMedicineModal" tabindex="-1" aria-labelledby="addnewMedicineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('pharmacist.add_product') }}">
+          {{ form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title" id="addnewMedicineModalLabel">إضافة دواء جديد</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
           </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
-          <button type="submit" class="btn btn-primary">بحث</button>
-        </div>
-      </form>
+          <div class="modal-body">
+            <div class="mb-3">{{ form.name.label(class="form-label") }} {{ form.name(class="form-control") }}</div>
+            <div class="mb-3">{{ form.quantity_in_shelf.label(class="form-label") }} {{ form.quantity_in_shelf(class="form-control") }}</div>
+            <div class="mb-3">{{ form.quantity_in_stock.label(class="form-label") }} {{ form.quantity_in_stock(class="form-control") }}</div>
+            <div class="mb-3">{{ form.shelf_number.label(class="form-label") }} {{ form.shelf_number(class="form-control") }}</div>
+            <div class="mb-3">{{ form.purchase_price.label(class="form-label") }} {{ form.purchase_price(class="form-control") }}</div>
+            <div class="mb-3">{{ form.sell_price.label(class="form-label") }} {{ form.sell_price(class="form-control") }}</div>
+            <div class="mb-3">{{ form.expiry_date.label(class="form-label") }} {{ form.expiry_date(class="form-control", type="date") }}</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-primary">إضافة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Increase Existing Medicine Modal -->
+  <div class="modal fade" id="addMedicineModal" tabindex="-1" aria-labelledby="addMedicineModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('pharmacist.increase_product') }}">
+          {{ form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title" id="addMedicineModalLabel">زيادة دواء موجود مسبقاً</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+          </div>
+          <div class="modal-body position-relative">
+            <div class="mb-3">
+              {{ form.name.label(class="form-label") }}
+              {{ form.name(class="form-control medicine-autocomplete", autocomplete="off") }}
+              <ul class="suggestions-list list-group"></ul>
+            </div>
+            <div class="mb-3">{{ form.quantity_in_shelf.label(class="form-label") }} {{ form.quantity_in_shelf(class="form-control") }}</div>
+            <div class="mb-3">{{ form.quantity_in_stock.label(class="form-label") }} {{ form.quantity_in_stock(class="form-control") }}</div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-primary">إضافة</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search Product Modal -->
+  <div class="modal fade" id="searchProductModal" tabindex="-1" aria-labelledby="searchProductModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('pharmacist.search_product') }}">
+          {{ form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title" id="searchProductModalLabel">البحث عن دواء</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+          </div>
+          <div class="modal-body position-relative">
+            <div class="mb-3">
+              <label for="searchName" class="form-label">اسم الدواء</label>
+              <input type="text" name="name" id="searchName" class="form-control medicine-autocomplete" placeholder="أدخل اسم الدواء" autocomplete="off" required>
+              <ul class="suggestions-list list-group"></ul>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-primary">بحث</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
+
+<!-- ========================= Scripts ========================= -->
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Auto-complete for all inputs with .medicine-autocomplete
+    document.querySelectorAll('.medicine-autocomplete').forEach(function (input) {
+      const wrapper = input.closest('.mb-3') || input.parentElement;
+      const suggestionsList = wrapper.querySelector('.suggestions-list');
+      if (!suggestionsList) return; // لا يوجد قائمة اقتراحات
+
+      // Fetch suggestions on input
+      input.addEventListener('input', function () {
+        const query = input.value.trim();
+        if (query.length < 2) {
+          suggestionsList.style.display = 'none';
+          suggestionsList.innerHTML = '';
+          return;
+        }
+
+        fetch(`/pharmacist/product-suggestions?query=${encodeURIComponent(query)}`)
+          .then((response) => response.json())
+          .then((data) => {
+            suggestionsList.innerHTML = '';
+            if (!Array.isArray(data) || data.length === 0) {
+              suggestionsList.style.display = 'none';
+              return;
+            }
+
+            data.forEach((item) => {
+              const li = document.createElement('li');
+              li.classList.add('list-group-item', 'list-group-item-action');
+              li.textContent = item;
+              li.tabIndex = 0;
+              li.setAttribute('role', 'option');
+              li.addEventListener('click', function () {
+                input.value = item;
+                suggestionsList.style.display = 'none';
+              });
+              li.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                  input.value = item;
+                  suggestionsList.style.display = 'none';
+                }
+              });
+              suggestionsList.appendChild(li);
+            });
+
+            suggestionsList.style.display = 'block';
+          })
+          .catch(() => {
+            // فشل الجلب: أخفِ القائمة بهدوء
+            suggestionsList.style.display = 'none';
+            suggestionsList.innerHTML = '';
+          });
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', function (e) {
+        if (!wrapper.contains(e.target)) {
+          suggestionsList.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+<script>
+function generateProductFields() {
+  const count = document.getElementById('productCount').value;
+  const container = document.getElementById('productsContainer');
+  const form = document.getElementById('sellForm');
+
+  container.innerHTML = ""; // مسح الحقول القديمة
+
+  if (count > 0) {
+    for (let i = 0; i < count; i++) {
+      const productGroup = document.createElement('div');
+      productGroup.classList.add("row", "g-2", "mb-2");
+
+      productGroup.innerHTML = `
+        <div class="col-md-6">
+          <input type="text" name="productName[]" class="form-control" placeholder="اسم المنتج ${i+1}" required>
         </div>
-    </div>
-</div>
+        <div class="col-md-6">
+          <input type="number" name="productQty[]" class="form-control" placeholder="الكمية" min="1" required>
+        </div>
+      `;
+      container.appendChild(productGroup);
+    }
+
+    form.style.display = "block";
+  }
+}
+</script>
 {% endblock %}

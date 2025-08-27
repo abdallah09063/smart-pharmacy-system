@@ -1,10 +1,54 @@
 from flask import render_template, redirect, url_for, flash, request,session, jsonify
 from app import db
-from app.models import Product, Sale, SaleItem
+from app.models import Product, Sale, SaleItem, Report
 from sqlalchemy import func
 from app.pharmacist_window.forms import ProductForm
 from datetime import datetime, date
 from . import pharmacist_bp
+
+
+@pharmacist_bp.route('/transfer-to-shelf', methods=['POST'])
+def transfer_to_shelf():
+    """Transfer specified quantity from stock into shelf for a product.
+    Validates product belongs to the current pharmacy and that stock has enough quantity.
+    """
+    pharmacy_id = session.get('pharmacy_id')
+    product_id = request.form.get('product_id')
+    try:
+        product_id = int(product_id)
+    except (TypeError, ValueError):
+        flash('معرّف المنتج غير صالح', 'danger')
+        return redirect(url_for('pharmacist.veiw_all_products'))
+    try:
+        qty = int(request.form.get('transfer_qty', 0))
+    except (ValueError, TypeError):
+        flash('الكمية غير صحيحة', 'danger')
+        return redirect(url_for('pharmacist.veiw_all_products'))
+
+    if not product_id or qty <= 0:
+        flash('يرجى تحديد المنتج والكمية بشكل صحيح', 'danger')
+        return redirect(url_for('pharmacist.veiw_all_products'))
+
+    product = Product.query.filter(
+        Product.id == product_id,
+        Product.pharmacy_id == pharmacy_id
+    ).first()
+
+    if not product:
+        flash('المنتج غير موجود', 'danger')
+        return redirect(url_for('pharmacist.veiw_all_products'))
+
+    if product.quantity_in_stock < qty:
+        flash('الكمية المطلوبة غير متوفرة في المخزن', 'danger')
+        return redirect(url_for('pharmacist.veiw_all_products'))
+
+    # Perform transfer
+    product.quantity_in_stock -= qty
+    product.quantity_in_shelf = (product.quantity_in_shelf or 0) + qty
+    db.session.commit()
+
+    flash('تم نقل الكمية إلى الرف بنجاح', 'success')
+    return redirect(url_for('pharmacist.veiw_all_products'))
 
 @pharmacist_bp.route('/') 
 def pharmacist_dashboard():
@@ -15,6 +59,11 @@ def pharmacist_dashboard():
                     .filter(func.date(Sale.created_at) == date.today())
                     .scalar() 
                     ) or 0
+    # Monetary total of sales today
+    today_total_sales = ( db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+                         .filter(func.date(Sale.created_at) == date.today())
+                         .scalar()
+                         ) or 0
     expired_products = ( db.session.query(func.count(Product.id))
                         .filter(Product.expiry_date < date.today())
                         .scalar()
@@ -22,9 +71,41 @@ def pharmacist_dashboard():
     few_products = Product.query.filter(Product.pharmacy_id == pharmacy_id,
                                         Product.quantity_in_shelf < 10 
                                      ).all()
-    return render_template('pharmacist/dashboard.html', product_count=product_count, today_sales=today_sales, expired_products=expired_products, 
+    return render_template('pharmacist/dashboard.html', product_count=product_count, today_sales=today_sales, today_total_sales=today_total_sales, expired_products=expired_products, 
                            few_products=few_products,
                            form=ProductForm())
+
+
+@pharmacist_bp.route('/create-daily-report', methods=['POST'])
+def create_daily_report():
+    """Create a simple daily report that stores today's total sales."""
+    pharmacist_id = session.get('pharmacist_id')
+    if not pharmacist_id:
+        flash("يرجى تسجيل الدخول لإنشاء التقرير", "danger")
+        return redirect(url_for('pharmacist.pharmacist_dashboard'))
+
+    # Compute monetary total for today
+    total_sales = ( db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+                   .filter(func.date(Sale.created_at) == date.today())
+                   .scalar()
+                   ) or 0
+
+    # Optional comment from pharmacist
+    comment = request.form.get('comment', '').strip()
+
+    # Create and save report
+    report = Report(
+        type='daily',
+        generated_by=pharmacist_id,
+        report_date=date.today(),
+        total_sales=total_sales,
+        comments=comment or None
+    )
+    db.session.add(report)
+    db.session.commit()
+
+    flash(f"تم إنشاء تقرير المبيعات اليومي. إجمالي المبيعات: {total_sales}", "success")
+    return redirect(url_for('pharmacist.pharmacist_dashboard'))
 
 @pharmacist_bp.route('/add-product', methods=['POST'])
 def add_product():
@@ -80,9 +161,61 @@ def increase_product():
     product.quantity_in_stock += qty_stock
 
     db.session.commit()
+
+    # Record the increase in the user's session so the dashboard can show recent increases
+    try:
+        recent = session.get('recent_increases', [])
+        recent.insert(0, {
+            'product_id': product.id,
+            'name': product.name,
+            'added_to_shelf': int(qty_shelf or 0),
+            'added_to_stock': int(qty_stock or 0),
+            'when': datetime.now().isoformat()
+        })
+        # Keep at most 5 recent entries
+        session['recent_increases'] = recent[:5]
+        session.modified = True
+    except Exception:
+        # If session can't store data for some reason, continue silently
+        pass
+
     flash("تم تحديث الكميات بنجاح", "success")
 
     return redirect(url_for('pharmacist.pharmacist_dashboard'))
+
+
+@pharmacist_bp.route('/dashboard-data')
+def dashboard_data():
+    """Return JSON used by the dashboard widget.
+    Provides low-stock products and recent increases (from session)
+    """
+    pharmacy_id = session.get('pharmacy_id')
+
+    # Low stock items (shelf quantity low)
+    low_products = Product.query.filter(
+        Product.pharmacy_id == pharmacy_id,
+        Product.quantity_in_shelf < 10,
+        Product.quantity_in_stock < 20
+    ).order_by(Product.quantity_in_shelf.asc()).limit(20).all()
+
+    low_list = []
+    for p in low_products:
+        low_list.append({
+            'id': p.id,
+            'name': p.name,
+            'quantity_in_shelf': int(p.quantity_in_shelf or 0),
+            'quantity_in_stock': int(p.quantity_in_stock or 0),
+            'shelf_number': p.shelf_number,
+            'expiry_date': p.expiry_date.isoformat() if p.expiry_date else None
+        })
+
+    # Recent increases kept in session (per-user)
+    recent = session.get('recent_increases', [])
+
+    return jsonify({
+        'low_stock': low_list,
+        'recent_increases': recent
+    })
 
 
 @pharmacist_bp.route('/search-product', methods=['POST'])
@@ -126,6 +259,36 @@ def product_suggestions():
     ).limit(5).all()  # نجيب فقط 5 اقتراحات
 
     return jsonify([p.name for p in products])
+
+
+@pharmacist_bp.route('/product-details')
+def product_details():
+    """Return JSON details for a product by name (case-insensitive) for the current pharmacy.
+    Used by front-end to populate unit price and available quantities.
+    """
+    name = request.args.get('name', '').strip()
+    pharmacy_id = session.get('pharmacy_id')
+
+    if not name:
+        return jsonify({}), 400
+
+    product = Product.query.filter(
+        Product.pharmacy_id == pharmacy_id,
+        Product.name.ilike(name)
+    ).first()
+
+    if not product:
+        return jsonify({}), 404
+
+    return jsonify({
+        'id': product.id,
+        'name': product.name,
+        'sell_price': float(product.sell_price or 0),
+        'quantity_in_shelf': int(product.quantity_in_shelf or 0),
+        'quantity_in_stock': int(product.quantity_in_stock or 0),
+        'shelf_number': product.shelf_number,
+        'expiry_date': product.expiry_date.isoformat() if product.expiry_date else None
+    })
 
 
 @pharmacist_bp.route('/veiw-all-products', methods=['GET'])

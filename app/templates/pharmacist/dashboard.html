@@ -4,26 +4,27 @@
 {% block navbar %}
 <nav class="navbar navbar-expand-lg dashboard-navbar" aria-label="شريط التنقل">
   <div class="container">
-    <a class="navbar-brand text-white d-flex align-items-center" href="#">
-      <i class="fas fa-pills me-2" aria-hidden="true"></i>
-      <span class="system">  نظام إدارة الصيدلية   </span>
-    </a>
-
-    <div class="navbar-nav ms-auto">
-      <div class="nav-item dropdown">
-        <a class="nav-link dropdown-toggle text-white d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="fas fa-user me-1" aria-hidden="true"></i>
-          <span class="visually-hidden">القائمة الشخصية:</span>
-          <span>{{ session.username }}</span>
+    <div class="d-flex align-items-center w-100 justify-content-between">
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand text-white d-flex align-items-center me-3" href="#">
+          <i class="fas fa-pills me-2" aria-hidden="true"></i>
+          <span class="system">نظام إدارة الصيدلية</span>
         </a>
-        <ul class="dropdown-menu dropdown-menu-end">
-          <li><hr class="dropdown-divider"></li>
-          <li>
-            <a class="dropdown-item" href="{{ url_for('auth.logout') }}">
-              <i class="fas fa-sign-out-alt me-2" aria-hidden="true"></i>تسجيل الخروج
-            </a>
-          </li>
-        </ul>
+      </div>
+
+      <div class="navbar-extra d-flex align-items-center">
+        <div class="me-3 text-end d-none d-sm-block">
+          <div class="pharmacist-name text-white">{{ session.pharmacist_name }}</div>
+          <div class="text-white-50 small">{{ session.username }}</div>
+        </div>
+        <div class="pharmacist-avatar" aria-hidden="true">{{ session.pharmacist_name[0] if session.pharmacist_name else 'P' }}</div>
+        <div class="dropdown ms-2">
+          <a class="btn btn-outline-light btn-sm dropdown-toggle" href="#" role="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">القائمة</a>
+          <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+            <li><a class="dropdown-item" href="{{ url_for('pharmacist.veiw_all_products') }}"><i class="fas fa-warehouse me-2"></i>إدارة المخزون</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</a></li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
@@ -36,12 +37,12 @@
     <div class="dashboard-card">
 
       <!-- Header -->
-      <header class="dashboard-header">
-        <h1 class="h3 mb-2">
-          <i class="fas fa-tachometer-alt me-3" aria-hidden="true"></i>
-          لوحة تحكم الصيدلي
-        </h1>
-        <p class="mb-0">مرحباً {{ session.pharmacist_name }}، إليك نظرة عامة على أنشطة الصيدلية اليوم</p>
+      <header class="dashboard-header p-4 mb-3 shadow-sm rounded-3 bg-white">
+        <div class="d-flex align-items-start justify-content-between flex-wrap">
+          <div>
+            <h1 class="h3 mb-1 d-flex align-items-center"><i class="fas fa-tachometer-alt me-3 text-primary" aria-hidden="true"></i>لوحة تحكم الصيدلي</h1>
+            <p class="mb-0 text-muted">مرحباً <strong>{{ session.pharmacist_name }}</strong> — إليك نظرة عامة على أنشطة الصيدلية اليوم</p>
+          </div>
       </header>
 
       <!-- Stats -->
@@ -64,66 +65,33 @@
       </section>
 
 
-      <!-- Two Column Widgets -->
+      <!-- One Column Widget -->
       <div class="row mt-4">
         <div class="col-md-6">
-          <section class="dashboard-card h-100" aria-label="تنبيهات حديثة">
-            <h4 class="h6 mb-3">
-              <i class="fas fa-bell me-2" aria-hidden="true"></i>
-               التنبيهات الحديثة
-            </h4>
-            <div class="list-group list-group-flush">
-              <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fas fa-exclamation-circle text-warning me-2" aria-hidden="true"></i>
-                     الرجاء مراجعة مخزون
-                  {% for product in few_products %}
-                    {% if loop.last %}
-                      {{ product.name }}
-                    {% else %}
-                      {{ product.name }} و
-                    {% endif %}
-                  {% endfor %}
-                  الكمية على الرف أوشكت على النفاذ
-                </div> 
-              </div>
-              <div class="list-group-item d-flex justify-content-between align-items-center">
-                <div>
-                  <i class="fas fa-check-circle text-success me-2" aria-hidden="true"></i>
-                  تم استلام شحنة أدوية جديدة
+            <section class="dashboard-card h-100" aria-label="تنبيهات حديثة">
+              <h4 class="h6 mb-3 d-flex justify-content-between align-items-center">
+                <span>
+                  <i class="fas fa-bell me-2" aria-hidden="true"></i>
+                   التنبيهات الحديثة
+                </span>
+                <small class="text-muted">آخر تحديث: <span id="widget-updated">-</span></small>
+              </h4>
+
+              <div id="dashboardWidget" class="p-2">
+                <!-- Low stock list -->
+                <div id="lowStockSection" class="mb-3">
+                  <h5 class="fw-semibold">الأدوية على وشك النفاد</h5>
+                  <ul id="lowStockList" class="list-group list-group-flush" aria-live="polite"></ul>
                 </div>
-                <small class="text-muted">أمس</small>
+
+                <!-- Recent increases -->
+                <div id="recentIncreasesSection">
+                  <h5 class="fw-semibold">آخر الزيادات بالمخزون</h5>
+                  <ul id="recentIncreasesList" class="list-group list-group-flush" aria-live="polite"></ul>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
         </div>
-        <!--<div class="col-md-6">
-          <section class="dashboard-card h-100" aria-label="أداء هذا الشهر">
-            <h4 class="h6 mb-3">
-              <i class="fas fa-chart-line me-2" aria-hidden="true"></i>أداء هذا الشهر
-            </h4>
-            <div class="row text-center g-3">
-              <div class="col-6">
-                <h5 class="text-primary mb-1">15,240 ر.س</h5>
-                <small class="text-muted">إجمالي المبيعات</small>
-              </div>
-              <div class="col-6">
-                <h5 class="text-success mb-1">+12%</h5>
-                <small class="text-muted">نمو المبيعات</small>
-              </div>
-            </div>
-            <div class="row text-center g-3 mt-1">
-              <div class="col-6">
-                <h5 class="text-info mb-1">342</h5>
-                <small class="text-muted">عدد العملاء</small>
-              </div>
-              <div class="col-6">
-                <h5 class="text-warning mb-1">89%</h5>
-                <small class="text-muted">رضا العملاء</small>
-              </div>
-            </div>
-          </section>
-        </div>-->
       </div>
 
       <!-- Quick Actions -->
@@ -154,6 +122,11 @@
             <span>البحث عن دواء</span>
           </a>
 
+          <a href="#" class="action-btn" data-bs-toggle="modal" data-bs-target="#dailyReportModal">
+            <i class="fas fa-file-alt" aria-hidden="true"></i>
+            <span>إنشاء تقرير يومي</span>
+          </a>
+
           <a href="{{ url_for('pharmacist.veiw_all_products') }}" class="action-btn">
             <i class="fas fa-warehouse" aria-hidden="true"></i>
             <span>إدارة المخزون</span>
@@ -163,17 +136,6 @@
             <i class="fas fa-chart-bar" aria-hidden="true"></i>
             <span>تفاصيل المبيعات</span>
           </a>
-
-          <!--<a href="#" class="action-btn">
-            <i class="fas fa-warehouse" aria-hidden="true"></i>
-            <span>إدارة المخزون</span>
-          </a>-->
-
-          <!--<a href="#" class="action-btn">
-            <i class="fas fa-users" aria-hidden="true"></i>
-            <span>إدارة العملاء</span>
-          </a>--->
-
         </div>
       </section>
     </div>
@@ -190,19 +152,35 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-
-        <!-- الخطوة الأولى: إدخال عدد المنتجات -->
-        <div id="step1">
-          <label class="form-label">كم عدد أنواع المنتجات المختلفة التي تريد بيعها؟</label>
-          <input type="number" id="productCount" class="form-control" min="1" placeholder="أدخل عدد المنتجات">
-          <button class="btn btn-success mt-3" onclick="generateProductFields()">متابعة</button>
-        </div>
-
-        <!-- الخطوة الثانية: إدخال تفاصيل المنتجات -->
-        <form id="sellForm" class="mt-3" style="display:none;" method="POST" action="{{ url_for('pharmacist.sell_product') }}">
+        <form id="sellForm" method="POST" action="{{ url_for('pharmacist.sell_product') }}">
           {{ form.hidden_tag() }}
-          <div id="productsContainer"></div>
-          <button type="submit" class="btn btn-primary mt-3">تأكيد البيع</button>
+
+          <div class="table-responsive">
+            <table class="table table-borderless align-middle" id="salesTable">
+              <thead>
+                <tr>
+                  <th style="width:45%">اسم المنتج</th>
+                  <th style="width:15%">الكمية</th>
+                  <th style="width:15%">سعر الوحدة</th>
+                  <th style="width:15%">المجموع</th>
+                  <th style="width:10%">إجراء</th>
+                </tr>
+              </thead>
+              <tbody id="salesTbody">
+                <!-- rows inserted dynamically -->
+              </tbody>
+            </table>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              <button type="button" id="addRowBtn" class="btn btn-outline-success">إضافة صف</button>
+            </div>
+            <div class="text-end">
+              <div class="mb-1">المجموع: <strong id="grandTotal">0</strong></div>
+              <button type="submit" class="btn btn-primary">تأكيد البيع</button>
+            </div>
+          </div>
         </form>
       </div>
     </div>
@@ -291,7 +269,37 @@
       </div>
     </div>
   </div>
+  
+  <!-- Daily Report Modal -->
+  <div class="modal fade" id="dailyReportModal" tabindex="-1" aria-labelledby="dailyReportModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form method="POST" action="{{ url_for('pharmacist.create_daily_report') }}">
+          {{ form.hidden_tag() }}
+          <div class="modal-header">
+            <h5 class="modal-title" id="dailyReportModalLabel">تقرير مبيعات اليوم</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="إغلاق"></button>
+          </div>
+          <div class="modal-body">
+            <p>إجمالي عدد المبيعات اليوم: <strong>{{ today_sales }}</strong></p>
+            <p>إجمالي المبيعات بالعملة: <strong>{{ today_total_sales }}</strong></p>
+            <div class="mb-3">
+              <label for="reportComment" class="form-label">ملاحظة (اختياري)</label>
+              <textarea id="reportComment" name="comment" class="form-control" rows="3" placeholder="أدخل ملاحظة قصيرة عن تفاصيل اليوم أو ملاحظات مهمة..."></textarea>
+            </div>
+            <p class="text-muted">سيتم حفظ تقرير بسيط يحوي إجمالي المبيعات باليوم.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-primary">إنشاء تقرير</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
 </div>
+
+{% raw %}
 
 <!-- ========================= Scripts ========================= -->
 <script>
@@ -385,5 +393,234 @@ function generateProductFields() {
     form.style.display = "block";
   }
 }
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const lowStockList = document.getElementById('lowStockList');
+  const recentIncreasesList = document.getElementById('recentIncreasesList');
+  const updatedEl = document.getElementById('widget-updated');
+
+  function renderLowStock(items) {
+    lowStockList.innerHTML = '';
+    if (!items || items.length === 0) {
+      lowStockList.innerHTML = '<li class="empty-state">لا توجد أدوية على وشك النفاد.</li>';
+      return;
+    }
+
+    items.forEach(p => {
+      const li = document.createElement('li');
+      const nameWrap = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = p.name;
+      const meta = document.createElement('div');
+      meta.className = 'product-meta';
+      meta.textContent = `عبر الرف: ${p.quantity_in_shelf} | في المخزن: ${p.quantity_in_stock} | الرف: ${p.shelf_number || '-'}${p.expiry_date ? ' | انتهاء: ' + new Date(p.expiry_date).toLocaleDateString() : ''}`;
+      nameWrap.appendChild(title);
+      nameWrap.appendChild(meta);
+
+      const badge = document.createElement('span');
+      badge.className = 'low-qty-badge';
+      badge.textContent = p.quantity_in_shelf;
+
+      li.appendChild(nameWrap);
+      li.appendChild(badge);
+      lowStockList.appendChild(li);
+    });
+  }
+
+  function renderRecentIncreases(items) {
+    recentIncreasesList.innerHTML = '';
+    if (!items || items.length === 0) {
+      recentIncreasesList.innerHTML = '<li class="empty-state">لا توجد زيادات حديثة بالمخزون.</li>';
+      return;
+    }
+
+    items.forEach(r => {
+      const li = document.createElement('li');
+      const nameWrap = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = r.name;
+      const meta = document.createElement('div');
+      meta.className = 'product-meta';
+      const when = new Date(r.when);
+      meta.textContent = `+${r.added_to_shelf} رف | +${r.added_to_stock} مخزن — ${when.toLocaleString()}`;
+      nameWrap.appendChild(title);
+      nameWrap.appendChild(meta);
+
+      const badge = document.createElement('span');
+      badge.className = 'recent-add-badge';
+      badge.textContent = '+' + (r.added_to_shelf + r.added_to_stock);
+
+      li.appendChild(nameWrap);
+      li.appendChild(badge);
+      recentIncreasesList.appendChild(li);
+    });
+  }
+
+  async function fetchDashboardData() {
+    try {
+      const res = await fetch('/pharmacist/dashboard-data');
+      if (!res.ok) throw new Error('Network');
+      const data = await res.json();
+      renderLowStock(data.low_stock);
+      renderRecentIncreases(data.recent_increases);
+      updatedEl.textContent = new Date().toLocaleTimeString();
+    } catch (e) {
+      lowStockList.innerHTML = '<li class="empty-state">فشل تحميل البيانات.</li>';
+      recentIncreasesList.innerHTML = '<li class="empty-state">فشل تحميل البيانات.</li>';
+      updatedEl.textContent = '-';
+    }
+  }
+
+  // initial fetch
+  fetchDashboardData();
+  // refresh every 30 seconds
+  setInterval(fetchDashboardData, 30000);
+});
+</script>
+{% endraw %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const salesTbody = document.getElementById('salesTbody');
+  const addRowBtn = document.getElementById('addRowBtn');
+  const grandTotalEl = document.getElementById('grandTotal');
+  const sellForm = document.getElementById('sellForm');
+
+  function formatCurrency(val) {
+    return (Math.round(val * 100) / 100).toFixed(2);
+  }
+
+  function createRow() {
+    const tr = document.createElement('tr');
+
+    tr.innerHTML = `
+      <td>
+        <input type="text" name="productName[]" class="form-control product-name" placeholder="اسم المنتج" autocomplete="off" required>
+        <ul class="suggestions-list list-group mt-1" style="display:none"></ul>
+      </td>
+      <td>
+        <input type="number" name="productQty[]" class="form-control product-qty" min="1" value="1" required>
+      </td>
+      <td>
+        <input type="text" readonly class="form-control unit-price" value="0.00">
+      </td>
+      <td>
+        <input type="text" readonly class="form-control subtotal" value="0.00">
+      </td>
+      <td>
+        <button type="button" class="btn btn-sm btn-danger remove-row">حذف</button>
+      </td>
+    `;
+
+    // Attach event handlers
+    const nameInput = tr.querySelector('.product-name');
+    const qtyInput = tr.querySelector('.product-qty');
+    const unitPriceInput = tr.querySelector('.unit-price');
+    const subtotalInput = tr.querySelector('.subtotal');
+    const suggestions = tr.querySelector('.suggestions-list');
+
+    let selectedProduct = null;
+
+    // Autocomplete suggestions
+    nameInput.addEventListener('input', function () {
+      const q = nameInput.value.trim();
+      suggestions.innerHTML = '';
+      if (q.length < 2) { suggestions.style.display = 'none'; selectedProduct = null; return; }
+      fetch(`/pharmacist/product-suggestions?query=${encodeURIComponent(q)}`)
+        .then(r => r.json())
+        .then(list => {
+          suggestions.innerHTML = '';
+          if (!Array.isArray(list) || list.length === 0) { suggestions.style.display = 'none'; return; }
+          list.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'list-group-item list-group-item-action';
+            li.textContent = item;
+            li.tabIndex = 0;
+            li.addEventListener('click', () => selectSuggestion(item));
+            suggestions.appendChild(li);
+          });
+          suggestions.style.display = 'block';
+        })
+        .catch(() => { suggestions.style.display = 'none'; });
+    });
+
+    function selectSuggestion(name) {
+      nameInput.value = name;
+      suggestions.style.display = 'none';
+      // Fetch product details
+      fetch(`/pharmacist/product-details?name=${encodeURIComponent(name)}`)
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(data => {
+          selectedProduct = data;
+          unitPriceInput.value = formatCurrency(data.sell_price || 0);
+          // adjust qty max? not enforced here but we show availability in title
+          qtyInput.title = `متوفر على الرف: ${data.quantity_in_shelf} ؛ في المخزن: ${data.quantity_in_stock}`;
+          updateSubtotal();
+        })
+        .catch(() => {
+          selectedProduct = null;
+          unitPriceInput.value = '0.00';
+          updateSubtotal();
+        });
+    }
+
+    function updateSubtotal() {
+      const qty = Number(qtyInput.value) || 0;
+      const unit = Number(unitPriceInput.value) || 0;
+      const subtotal = qty * unit;
+      subtotalInput.value = formatCurrency(subtotal);
+      updateGrandTotal();
+    }
+
+    qtyInput.addEventListener('input', updateSubtotal);
+
+    tr.querySelector('.remove-row').addEventListener('click', function () {
+      tr.remove();
+      updateGrandTotal();
+    });
+
+    // hide suggestions when clicking outside
+    document.addEventListener('click', function (e) {
+      if (!tr.contains(e.target)) suggestions.style.display = 'none';
+    });
+
+    salesTbody.appendChild(tr);
+    nameInput.focus();
+    return tr;
+  }
+
+  function updateGrandTotal() {
+    let total = 0;
+    document.querySelectorAll('#salesTbody .subtotal').forEach(el => {
+      total += Number(el.value) || 0;
+    });
+    grandTotalEl.textContent = formatCurrency(total);
+  }
+
+  // initial row
+  createRow();
+
+  addRowBtn.addEventListener('click', () => createRow());
+
+  // validate before submit: ensure product exists and enough quantity
+  sellForm.addEventListener('submit', function (e) {
+    const rows = Array.from(document.querySelectorAll('#salesTbody tr'));
+    if (rows.length === 0) { e.preventDefault(); alert('أضف منتجاً واحداً على الأقل'); return; }
+
+    for (const tr of rows) {
+      const name = tr.querySelector('.product-name').value.trim();
+      const qty = Number(tr.querySelector('.product-qty').value) || 0;
+      const unit = Number(tr.querySelector('.unit-price').value) || 0;
+      if (!name || qty <= 0) { e.preventDefault(); alert('تحقق من اسم المنتج والكمية'); return; }
+      // Optionally, could fetch product-details synchronously to validate availability.
+    }
+
+    // allow submit; backend will perform full validation
+  });
+});
 </script>
 {% endblock %}

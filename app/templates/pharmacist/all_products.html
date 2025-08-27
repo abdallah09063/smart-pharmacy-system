@@ -22,11 +22,80 @@
                 <td>{{ product.quantity_in_shelf }}</td>
                 <td>{{ product.quantity_in_stock }}</td>
                 <td>{{ product.expiry_date.strftime('%Y-%m-%d') }}</td>
-                <td>{{ product.shelf_number or '-' }}</td>
+                                    <td>{{ product.shelf_number or '-' }}</td>
+                                    <td>
+                                            <!-- Transfer to shelf button (opens modal) -->
+                                            <button type="button" class="btn btn-sm btn-primary transfer-btn"
+                                                            data-id="{{ product.id }}"
+                                                            data-name="{{ product.name }}"
+                                                            data-stock="{{ product.quantity_in_stock }}">
+                                                    نقل إلى الرف
+                                            </button>
+                                    </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+    
+            <!-- Transfer Modal -->
+            <div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="transferModalLabel">نقل المنتج إلى الرف</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form method="POST" action="{{ url_for('pharmacist.transfer_to_shelf') }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <div class="modal-body">
+                                <p>نقل كمية من: <strong id="transferProductName"></strong></p>
+                                <input type="hidden" name="product_id" id="transferProductId" value="">
+
+                                <div class="mb-3">
+                                    <label for="transferQty" class="form-label">الكمية المراد نقلها</label>
+                                    <input type="number" class="form-control" id="transferQty" name="transfer_qty" min="1" required>
+                                    <small class="form-text text-muted">الحد الأقصى المتاح في المخزن: <span id="transferMax">0</span></small>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                                <button type="submit" class="btn btn-primary">نقل</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- Script to handle transfer button clicks and populate modal -->
+            <script>
+                // Populate and show transfer modal when clicking transfer buttons
+                document.addEventListener('DOMContentLoaded', function () {
+                    var transferButtons = document.querySelectorAll('.transfer-btn');
+                    transferButtons.forEach(function(btn){
+                        btn.addEventListener('click', function(){
+                            var id = this.dataset.id;
+                            var name = this.dataset.name;
+                            var stock = parseInt(this.dataset.stock || '0', 10);
+
+                            document.getElementById('transferProductName').textContent = name;
+                            document.getElementById('transferProductId').value = id;
+                            var qtyInput = document.getElementById('transferQty');
+                            qtyInput.max = stock;
+                            qtyInput.value = Math.min(1, stock) > 0 ? 1 : 0;
+                            document.getElementById('transferMax').textContent = stock;
+
+                            // Show bootstrap modal (assumes Bootstrap JS is loaded)
+                            if (typeof bootstrap !== 'undefined') {
+                                var myModal = new bootstrap.Modal(document.getElementById('transferModal'));
+                                myModal.show();
+                            } else {
+                                // Fallback: make modal visible
+                                document.getElementById('transferModal').classList.add('show');
+                                document.getElementById('transferModal').style.display = 'block';
+                            }
+                        });
+                    });
+                });
+            </script>
     <a href="{{ url_for('pharmacist.pharmacist_dashboard') }}" class="btn btn-secondary mt-3">عودة للوحة التحكم</a>
 </div>
 {% endblock %}

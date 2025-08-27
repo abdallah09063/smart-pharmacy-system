@@ -9,8 +9,99 @@ body {
     direction: rtl;
 }
 
+ /* Widget custom styles */
+  #dashboardWidget h5 {
+    margin: 0 0 8px 0;
+    color: #2c3e50;
+    font-size: 0.95rem;
+  }
+  #lowStockList li, #recentIncreasesList li {
+    padding: 10px 12px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: linear-gradient(90deg, #fff, #f8f9fa);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .product-meta {
+    font-size: 0.85rem;
+    color: #6c757d;
+    display: block;
+    margin-top: 6px;
+  }
+  .low-qty-badge {
+    background: #ffc107;
+    color: #212529;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 700;
+  }
+  .recent-add-badge {
+    background: #198754;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .empty-state {
+    color: #6c757d;
+    padding: 10px 12px;
+    background: #fff;
+    border-radius: 8px;
+    border: 1px dashed #e9ecef;
+  }
+
 .system {
     margin-right: 30px;
+}
+
+/* Dashboard-specific header & navbar improvements */
+.dashboard-navbar {
+    background: linear-gradient(90deg, #5167d0 0%, #6f4caf 100%);
+    padding: 0.6rem 1rem;
+}
+
+.dashboard-navbar .navbar-brand {
+    font-weight: 800;
+    font-size: 1.15rem;
+    letter-spacing: 0.2px;
+}
+
+.pharmacist-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ffffff22, #ffffff11);
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    border: 2px solid rgba(255,255,255,0.15);
+}
+
+.navbar-extra .btn-outline-light {
+    border-radius: 8px;
+}
+
+.dashboard-header {
+    background: transparent;
+}
+
+.badge-stats {
+    min-width: 90px;
+    box-shadow: 0 6px 18px rgba(15,23,42,0.04);
+}
+
+.badge-stats .small {
+    color: #6c757d;
+}
+
+@media (max-width: 576px) {
+    .pharmacist-avatar { width: 36px; height: 36px; }
+    .badge-stats { min-width: 70px; }
 }
 
 /* Auth Pages Styling */

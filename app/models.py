@@ -55,6 +55,7 @@ class Report(db.Model):
     report_date = db.Column(db.Date, default=date.today)
     total_sales = db.Column(db.Numeric(10, 2))
     most_sold_product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    comments = db.Column(db.Text, nullable=True)
 
     generator = db.relationship('Pharmacist', foreign_keys=[generated_by])
     most_sold_product = db.relationship('Product', foreign_keys=[most_sold_product_id])

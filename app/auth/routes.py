@@ -117,6 +117,5 @@ def logout():
         if last_login and last_login.logout_time is None:
             last_login.logout_time = datetime.now(timezone.utc)
             db.session.commit()
-        flash('تم تسجيل الخروج بنجاح', 'info')
 
     return redirect(url_for('auth.pharmacist_login'))

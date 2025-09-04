@@ -1,5 +1,4 @@
 from flask import jsonify, session, flash, redirect, url_for
-from flask_jwt_extended import get_jwt_identity
 from functools import wraps
 from app import models
 

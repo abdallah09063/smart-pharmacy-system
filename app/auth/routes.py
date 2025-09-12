@@ -71,7 +71,7 @@ def manager_login():
 def pharmacist_login():
     form = LoginForm()
     if form.validate_on_submit():
-        pharmacist = Pharmacist.query.filter_by(email=form.email.data).first()
+        pharmacist = Pharmacist.query.filter_by(email=form.email.data, active=True).first()
 
         if pharmacist and check_password_hash(pharmacist.password_hash, form.password.data):
             # Set session
@@ -93,29 +93,36 @@ def pharmacist_login():
     return render_template('auth/pharmacist_login.html', form=form)
 
 
-@auth_bp.route('/logout')
-def logout():
-    if 'manager_id' in session:
-        session.pop('manager_id', None)
-        session.pop('manager_name', None)
-        session.pop('pharmacy_name', None)
-        session.pop('pharmacy_id', None)
-        flash('تم تسجيل الخروج بنجاح', 'info')
-        return redirect(url_for('auth.manager_login'))
-    
-    elif 'pharmacist_id' in session:
-        pharmacist_id = session.get('pharmacist_id')
-        session.pop('pharmacist_id', None)
-        session.pop('pharmacist_name', None)
-        session.pop('pharmacy_name', None)
-        session.pop('pharmacy_id', None)
-        # Clear login activity session
-        flash('تم تسجيل الخروج بنجاح', 'info')
+@auth_bp.route('/logout_manager')
+def logout_manager():
 
-        # تحديث وقت الخروج في سجل النشاط
-        last_login = LoginActivity.query.filter_by(pharmacist_id=pharmacist_id).order_by(LoginActivity.login_time.desc()).first()
-        if last_login and last_login.logout_time is None:
-            last_login.logout_time = datetime.now(timezone.utc)
-            db.session.commit()
+    # Clear manager session
+    session.pop('manager_id', None)
+    session.pop('manager_name', None)
+    session.pop('pharmacy_name', None)
+    session.pop('pharmacy_id', None)
+    flash('تم تسجيل الخروج بنجاح', 'info')
 
+    return redirect(url_for('auth.manager_login'))
+
+@auth_bp.route('/logout_pharmacist')
+def logout_pharmacist():
+    pharmacist_id = session.get('pharmacist_id')
+
+    # Clear pharmacist session
+    session.pop('pharmacist_id', None)
+    session.pop('pharmacist_name', None)
+    session.pop('pharmacy_name', None)
+    session.pop('pharmacy_id', None)
+
+    # Update logout time for the most recent login activity
+    login_activity = LoginActivity.query.filter_by(
+        pharmacist_id=pharmacist_id).order_by(LoginActivity.login_time.desc()).first()
+
+    if login_activity.logout_time is None:
+        login_activity.logout_time = datetime.now(timezone.utc)
+        db.session.commit()
+
+    flash('تم تسجيل الخروج بنجاح', 'info')
+        
     return redirect(url_for('auth.pharmacist_login'))

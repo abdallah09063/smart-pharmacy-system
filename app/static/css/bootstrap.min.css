@@ -57,6 +57,13 @@ body {
     margin-right: 30px;
 }
 
+.remove {
+    color: white;
+    margin-top: 50px;
+    border-color: #212529;
+    background-color: #ff1212;
+}
+
 /* Dashboard-specific header & navbar improvements */
 .dashboard-navbar {
     background: linear-gradient(90deg, #5167d0 0%, #6f4caf 100%);

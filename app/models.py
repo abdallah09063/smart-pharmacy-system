@@ -34,6 +34,7 @@ class Pharmacist(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'), nullable=False)
+    active = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     pharmacy = db.relationship('Pharmacy', backref='pharmacists')
@@ -81,11 +82,13 @@ class Product(db.Model):
 class Sale(db.Model):
     __tablename__ = 'sale'
     id = db.Column(db.Integer, primary_key=True)
+    pharmacy_id = db.Column(db.Integer, db.ForeignKey('pharmacy.id'), nullable=False)
     pharmacist_id = db.Column(db.Integer, db.ForeignKey('pharmacist.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     total_price = db.Column(db.Numeric(10, 2), nullable=False)
 
     pharmacist = db.relationship('Pharmacist', backref='sales')
+    pharmacy = db.relationship('Pharmacy', backref='sales')
 
 class SaleItem(db.Model):
     __tablename__ = 'sale_item'

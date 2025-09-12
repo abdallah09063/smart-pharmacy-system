@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}تفاصيل الصيدلي{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg dashboard-navbar">
+    <div class="container">
+        <a class="navbar-brand text-white" href="#">
+            <i class="fas fa-shield-alt me-2"></i>
+            نظام إدارة الصيدلية - المدير
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-shield me-1"></i>
+                    {{ session.username }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>الملف الشخصي</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>إعدادات النظام</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-users-cog me-2"></i>إدارة المستخدمين</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.logout_manager') }}"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="dashboard-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h2><i class="fas fa-user me-2"></i>تفاصيل الصيدلي</h2>
+                    <p>الاسم: <span class="fw-bold">{{ pharmacist.name }}</span></p>
+                    <p>البريد الإلكتروني: <span class="fw-bold">{{ pharmacist.email }}</span></p>
+                </div>
+                <a href="{{ url_for('manager.pharmacists_list') }}" class="btn btn-outline-secondary">رجوع</a>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <h5>سجل الدخول اليومي</h5>
+                    <ul class="list-group">
+                        {% for login in logins %}
+                        <li class="list-group-item">
+                            <i class="fas fa-sign-in-alt text-success me-2"></i>
+                            {{ login.login_time.strftime('%Y-%m-%d %H:%M') }}
+                            {% if login.logout_time %}
+                                <span class="text-muted"> - خروج: {{ login.logout_time.strftime('%Y-%m-%d %H:%M') }}</span>
+                            {% else %}
+                                <span class="badge bg-success">متصل الآن</span>
+                            {% endif %}
+                        </li>
+                        {% else %}
+                        <li class="list-group-item">لا يوجد سجلات دخول</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h5>سجل المبيعات</h5>
+                    <ul class="list-group">
+                        {% for sale in sales %}
+                        <li class="list-group-item">
+                            <i class="fas fa-money-bill-wave text-primary me-2"></i>
+                            {{ sale.created_at.strftime('%Y-%m-%d %H:%M') }} - <span class="fw-bold">{{ '{:,.0f}'.format(sale.total_price or 0) }}</span>
+                        </li>
+                        {% else %}
+                        <li class="list-group-item">لا يوجد مبيعات</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div>
+                    <a href="{{ url_for('manager.delete_pharmacist') }}" class="btn remove">إزالة الصيدلي</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

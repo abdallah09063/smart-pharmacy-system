@@ -7,6 +7,70 @@ from datetime import datetime, date
 from . import pharmacist_bp
 
 
+@pharmacist_bp.route('/') 
+def pharmacist_dashboard():
+    pharmacy_id = session.get('pharmacy_id')
+    product_count = (db.session.query(func.count(func.distinct(Product.name)))
+    .filter(Product.pharmacy_id == pharmacy_id)
+    .scalar() or 0 
+    )
+    today_sales = ( db.session.query(func.sum(SaleItem.quantity_sold))
+                    .join(Sale, SaleItem.sale_id == Sale.id)
+                    .filter(func.date(Sale.created_at) == date.today(),
+                            Sale.pharmacy_id == pharmacy_id)
+                    .scalar() 
+                    ) or 0
+    # Monetary total of sales today
+    today_total_sales = ( db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
+                         .filter(func.date(Sale.created_at) == date.today())
+                         .scalar()
+                         ) or 0
+    expired_products = ( db.session.query(func.count(Product.id))
+                        .filter(Product.expiry_date < date.today(),
+                                Product.pharmacy_id == pharmacy_id)
+                        .scalar()
+                        ) or 0 
+    few_products = Product.query.filter(Product.pharmacy_id == pharmacy_id,
+                                        Product.quantity_in_shelf < 10 
+                                     ).all()
+    return render_template('pharmacist/dashboard.html', product_count=product_count, today_sales=today_sales, today_total_sales=today_total_sales, expired_products=expired_products, 
+                           few_products=few_products,
+                           form=ProductForm())
+
+@pharmacist_bp.route('/dashboard-data')
+def dashboard_data():
+    """Return JSON used by the dashboard widget.
+    Provides low-stock products and recent increases (from session)
+    """
+    pharmacy_id = session.get('pharmacy_id')
+
+    # Low stock items (shelf quantity low)
+    low_products = Product.query.filter(
+        Product.pharmacy_id == pharmacy_id,
+        Product.quantity_in_shelf < 10,
+        Product.quantity_in_stock < 20
+    ).order_by(Product.quantity_in_shelf.asc()).limit(20).all()
+
+    low_list = []
+    for p in low_products:
+        low_list.append({
+            'id': p.id,
+            'name': p.name,
+            'quantity_in_shelf': int(p.quantity_in_shelf or 0),
+            'quantity_in_stock': int(p.quantity_in_stock or 0),
+            'shelf_number': p.shelf_number,
+            'expiry_date': p.expiry_date.isoformat() if p.expiry_date else None
+        })
+
+    # Recent increases kept in session (per-user)
+    recent = session.get('recent_increases', [])
+
+    return jsonify({
+        'low_stock': low_list,
+        'recent_increases': recent
+    })
+
+
 @pharmacist_bp.route('/transfer-to-shelf', methods=['POST'])
 def transfer_to_shelf():
     """Transfer specified quantity from stock into shelf for a product.
@@ -49,31 +113,6 @@ def transfer_to_shelf():
 
     flash('تم نقل الكمية إلى الرف بنجاح', 'success')
     return redirect(url_for('pharmacist.veiw_all_products'))
-
-@pharmacist_bp.route('/') 
-def pharmacist_dashboard():
-    pharmacy_id = session.get('pharmacy_id')
-    product_count = db.session.query(func.count(func.distinct(Product.name))).scalar()
-    today_sales = ( db.session.query(func.sum(SaleItem.quantity_sold))
-                    .join(Sale, SaleItem.sale_id == Sale.id)
-                    .filter(func.date(Sale.created_at) == date.today())
-                    .scalar() 
-                    ) or 0
-    # Monetary total of sales today
-    today_total_sales = ( db.session.query(func.coalesce(func.sum(Sale.total_price), 0))
-                         .filter(func.date(Sale.created_at) == date.today())
-                         .scalar()
-                         ) or 0
-    expired_products = ( db.session.query(func.count(Product.id))
-                        .filter(Product.expiry_date < date.today())
-                        .scalar()
-                        ) or 0 
-    few_products = Product.query.filter(Product.pharmacy_id == pharmacy_id,
-                                        Product.quantity_in_shelf < 10 
-                                     ).all()
-    return render_template('pharmacist/dashboard.html', product_count=product_count, today_sales=today_sales, today_total_sales=today_total_sales, expired_products=expired_products, 
-                           few_products=few_products,
-                           form=ProductForm())
 
 
 @pharmacist_bp.route('/create-daily-report', methods=['POST'])
@@ -182,40 +221,6 @@ def increase_product():
     flash("تم تحديث الكميات بنجاح", "success")
 
     return redirect(url_for('pharmacist.pharmacist_dashboard'))
-
-
-@pharmacist_bp.route('/dashboard-data')
-def dashboard_data():
-    """Return JSON used by the dashboard widget.
-    Provides low-stock products and recent increases (from session)
-    """
-    pharmacy_id = session.get('pharmacy_id')
-
-    # Low stock items (shelf quantity low)
-    low_products = Product.query.filter(
-        Product.pharmacy_id == pharmacy_id,
-        Product.quantity_in_shelf < 10,
-        Product.quantity_in_stock < 20
-    ).order_by(Product.quantity_in_shelf.asc()).limit(20).all()
-
-    low_list = []
-    for p in low_products:
-        low_list.append({
-            'id': p.id,
-            'name': p.name,
-            'quantity_in_shelf': int(p.quantity_in_shelf or 0),
-            'quantity_in_stock': int(p.quantity_in_stock or 0),
-            'shelf_number': p.shelf_number,
-            'expiry_date': p.expiry_date.isoformat() if p.expiry_date else None
-        })
-
-    # Recent increases kept in session (per-user)
-    recent = session.get('recent_increases', [])
-
-    return jsonify({
-        'low_stock': low_list,
-        'recent_increases': recent
-    })
 
 
 @pharmacist_bp.route('/search-product', methods=['POST'])
@@ -354,6 +359,7 @@ def sell_product():
 
     # Create sale record
     sale = Sale(
+        pharmacy_id=pharmacy_id,
         pharmacist_id=pharmacist_id,
         total_price=total_price,
         created_at=datetime.now()

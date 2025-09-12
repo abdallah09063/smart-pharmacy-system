@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}إضافة صيدلي جديد{% endblock %}
+
+{% block navbar %}
+<nav class="navbar navbar-expand-lg dashboard-navbar">
+    <div class="container">
+        <a class="navbar-brand text-white" href="#">
+            <i class="fas fa-shield-alt me-2"></i>
+            نظام إدارة الصيدلية - المدير
+        </a>
+        <div class="navbar-nav ms-auto">
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle text-white" href="#" role="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-shield me-1"></i>
+                    {{ session.username }}
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog me-2"></i>الملف الشخصي</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>إعدادات النظام</a></li>
+                    <li><a class="dropdown-item" href="#"><i class="fas fa-users-cog me-2"></i>إدارة المستخدمين</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="{{ url_for('auth.logout_manager') }}"><i class="fas fa-sign-out-alt me-2"></i>تسجيل الخروج</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="dashboard-header">
+                <h2><i class="fas fa-user-plus me-2"></i>إضافة صيدلي جديد</h2>
+            </div>
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                <div class="form-group mb-3">
+                    {{ form.pharmacist_name.label(class="form-label") }}
+                    {{ form.pharmacist_name(class="form-control") }}
+                    {% for error in form.pharmacist_name.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group mb-3">
+                    {{ form.email.label(class="form-label") }}
+                    {{ form.email(class="form-control") }}
+                    {% for error in form.email.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {{ form.password(class="form-control") }}
+                    {% for error in form.password.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <div class="form-group mb-3">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    {{ form.confirm_password(class="form-control") }}
+                    {% for error in form.confirm_password.errors %}
+                        <div class="text-danger small">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="btn btn-primary">إضافة</button>
+                <a href="{{ url_for('manager.pharmacists_list') }}" class="btn btn-secondary">رجوع</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

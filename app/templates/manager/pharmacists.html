@@ -54,7 +54,7 @@
                         <tr>
                             <td>{{ pharmacist.name }}</td>
                             <td>{{ pharmacist.email }}</td>
-                            <td>{{ pharmacist.login_count_today }}</td>
+                            <td>{{ pharmacist.login_count_today or 0}}</td>
                             <td>{{ '{:,.0f}'.format(pharmacist.sales_today or 0) }}</td>
                             <td>
                                 <a href="{{ url_for('manager.pharmacist_details', pharmacist_id=pharmacist.id) }}" class="btn btn-sm btn-outline-info"><i class="fas fa-eye"></i> تفاصيل</a>
@@ -65,6 +65,9 @@
                         {% endfor %}
                     </tbody>
                 </table>
+                <div>
+                    <a href="{{ url_for('manager.manager_dashboard') }}" class="btn btn-secondary">رجوع</a>
+                </div>
             </div>
         </div>
     </div>

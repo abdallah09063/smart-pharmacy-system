@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}قائمة الأدوية - {{ pharmacy.name }}{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="container">
+        <div class="dashboard-card">
+            <div class="dashboard-header d-flex justify-content-between align-items-center">
+                <h1><i class="fas fa-pills me-3"></i>قائمة الأدوية</h1>
+                <a href="{{ url_for('manager.manage_pharmacy') }}" class="btn btn-secondary">رجوع</a>
+            </div>
+            <div class="table-responsive mt-4">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>اسم الدواء</th>
+                            <th>الكمية على الرف</th>
+                            <th>الكمية في المخزن</th>
+                            <th>رقم الرف</th>
+                            <th>سعر الشراء</th>
+                            <th>سعر البيع</th>
+                            <th>تاريخ الانتهاء</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                        <tr>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.quantity_in_shelf }}</td>
+                            <td>{{ product.quantity_in_stock }}</td>
+                            <td>{{ product.shelf_number or '-' }}</td>
+                            <td>{{ product.purchase_price }}</td>
+                            <td>{{ product.sell_price }}</td>
+                            <td>{% if product.expiry_date %}{{ product.expiry_date.strftime('%Y-%m-%d') }}{% else %}-{% endif %}</td>
+                        </tr>
+                        {% else %}
+                        <tr><td colspan="7" class="text-center">لا توجد أدوية مسجلة</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
